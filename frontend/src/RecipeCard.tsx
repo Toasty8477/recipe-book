@@ -1,3 +1,5 @@
+import './RecipeCard.css'
+
 interface RecipeCardProps {
     name: string
     type: string
@@ -5,7 +7,7 @@ interface RecipeCardProps {
 
 const RecipeCard = ({ name, type }: RecipeCardProps) => {
     return (
-        <div>
+        <div className="recipeCard">
             <h3>{name}</h3>
             <p>{type}</p>
         </div>

@@ -1,0 +1,8 @@
+.recipeCard {
+    background-color: var(--accent-bg);
+    border-width: 0.25rem;
+    border-color: var(--accent-border);
+    border-radius: 1rem;
+    padding: 0.5rem;
+    margin: 1rem;
+}
