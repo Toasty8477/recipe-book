@@ -1,0 +1,41 @@
+erDiagram
+    direction LR
+    RECIPE ||..|{ USED_IN : has
+    INGREDIENT ||..|{ USED_IN : has
+    RECIPE ||..|{ GOES_WITH : "goes with"
+    MEAL ||..|{ DISH_IN : "part of"
+    RECIPE ||..|{ DISH_IN : "part of"
+    UNIT ||--|{ USED_IN : "measurement of"
+
+    RECIPE {
+        int recipe_id PK 
+        varchar name
+        varchar type
+        longtext instructions
+    }
+    INGREDIENT {
+        varchar name PK
+        varchar type
+    }
+    USED_IN {
+        int recipe_id PK,FK
+        varchar ingredient_name PK,FK
+        decimal quantity
+        varchar unit
+    }
+    GOES_WITH {
+        int dish_1_id PK,FK
+        int dish_2_id PK,FK
+    }
+    MEAL {
+        int meal_id PK
+        varchar meal_name
+    }
+    DISH_IN {
+        int dish_id PK,FK
+        int meal_id PK,FK
+    }
+    UNIT {
+        varchar unit_name PK
+        varchar unit_type
+    }
