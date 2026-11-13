@@ -8,8 +8,10 @@ interface RecipesResponse {
 }
 
 interface RecipeData {
+    id: number
     name: string
     type: string
+    steps: string
 }
 
 const RecipeGrid = () => {
@@ -37,7 +39,12 @@ const RecipeGrid = () => {
                 <h1>Recipes</h1>
                 <div className="mainGrid">
                     {items.map((item: RecipeData) => (
-                        <RecipeCard name={item.name} type={item.type}/>
+                        <Link to={{
+                            pathname: "/recipe",
+                            search: `?id=${item.id}`
+                        }} className="unhighlighted">
+                            <RecipeCard name={item.name} type={item.type} key={item.id}/>
+                        </Link>
                     ))}
                 </div>
                 <Link to="/add" className="addButton">

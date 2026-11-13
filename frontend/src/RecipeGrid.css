@@ -21,3 +21,8 @@
 .addButton > button > img {
     padding: 0.75rem;
 }
+
+.unhighlighted {
+    text-decoration: none;
+    color: var(--text);
+}
