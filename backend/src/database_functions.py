@@ -46,10 +46,17 @@ def get_all_recipes(connection):
     query = "SELECT recipe_id, recipe_name, recipe_type FROM recipe"
     cursor = connection.cursor()
     cursor.execute(query)
-    return cursor.fetchall()
+    ret = cursor.fetchall()
+    cursor.close()
+    return ret
 
 def get_recipe_by_id(connection, recipe_id):
-    pass
+    query = "SELECT * FROM recipe WHERE recipe_id = %s"
+    cursor = connection.cursor()
+    cursor.execute(query, (recipe_id,))
+    ret = cursor.fetchall()
+    cursor.close()
+    return ret
 
 def get_recipes_by_name(connection, name):
     pass

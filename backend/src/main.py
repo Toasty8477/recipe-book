@@ -3,13 +3,14 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import sys
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from mysql.connector import Error as MySQLError
 
-from database_functions import connect_to_db, add_ingredient, get_all_recipes
+from database_functions import connect_to_db, add_ingredient, get_all_recipes, get_recipe_by_id
 
 from request_class_defs import Ingredient
+from recipe import Recipe
 
 app = FastAPI()
 
@@ -30,7 +31,7 @@ db_connection = None
 # Basic route to test the API
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Your API connection is working"}
 
 @app.post("/add_ingredient")
 def add_ingredient_route(ingredient: Ingredient):
@@ -44,11 +45,46 @@ def add_ingredient_route(ingredient: Ingredient):
 @app.get("/recipes")
 def get_all_recipes_route():
     global db_connection
+    response = [];
+
     try:
+        # Read all recipes from the database
         recipes = get_all_recipes(db_connection)
+    except MySQLError:
+        # If an error occurs return code 500
+        raise HTTPException(status_code=500, detail="A database error occurred")
+
+    # For each recipe in the select output, map its values to an object then add to a list
+    for recipe in recipes:
+        response.append(Recipe(recipe[0], recipe[1], recipe[2], "Steps are not returned by this request"))
+    # Return the list of recipe objects
+    return {"recipes": response}
+
+@app.get("/recipe")
+def get_recipe_by_id_route(id: int = 0):
+    global db_connection
+
+    if id <= 0:
+        raise HTTPException(status_code=400, detail="id parameter less than 1 or not specified")
+
+    try:
+        recipe = get_recipe_by_id(db_connection, id)
+
+        if not len(recipe) == 1:
+            raise HTTPException(status_code=404, detail="Recipe could not be found")
+
+        recipe = recipe[0]
+
     except MySQLError as e:
-        return {"error": f"Error retrieving recipes: {e}"}
-    return {"recipes": recipes}
+        # If an error occurs return code 500
+        raise HTTPException(status_code=500, detail=f"A database error occurred")   
+
+    return {
+            "id": id,
+            "name": recipe[1],
+            "type": recipe[2],
+            "steps": recipe[3]
+        }
     
 @app.on_event("startup")
 def startup_event():
