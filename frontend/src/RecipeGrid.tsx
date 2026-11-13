@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import RecipeCard from './RecipeCard.tsx'
 import './RecipeGrid.css'
 
@@ -39,6 +40,9 @@ const RecipeGrid = () => {
                         <RecipeCard name={item.name} type={item.type}/>
                     ))}
                 </div>
+                <Link to="/add" className="addButton">
+                    <button><img src="/add.svg"/></button>
+                </Link>
             </>
         )
     }
