@@ -15,19 +15,39 @@ interface RecipeData {
 }
 
 const RecipeGrid = () => {
-    const [items, setItems] = useState<any[]>([])
+    const [recipes, setRecipes] = useState<any[]>([])
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
+    const [error, setError] = useState<string>()
 
     useEffect(() => {
         fetch("http://localhost:8000/recipes")
-            .then((res) => res.json())
+            .then((res) => {
+                if (res.ok) {
+                    return res.json()
+                } else {
+                    throw new Error(`${res.status}`)
+                }
+            })
             .then((json: RecipesResponse) => {
-                setItems(json.recipes)
+                setRecipes(json.recipes)
                 setIsLoaded(true)
+            })
+            .catch((error) => {
+                setError(error.message)
             })
     }, [])
 
-    if (!isLoaded) {
+    if (error) {
+        const errorStatus = error.substring(0, 2)
+        const errorCat = `https://http.cat/${errorStatus}`
+        return (
+            <>
+                <h1>Error Loading Recipes</h1>
+                <p>{error}</p>
+                <img src={errorCat} className="errorImage"/>
+            </>
+        )
+    } else if (!isLoaded) {
         return (
             <>
                 <h1>Loading Recipes</h1>
@@ -38,12 +58,12 @@ const RecipeGrid = () => {
             <>
                 <h1>Recipes</h1>
                 <div className="mainGrid">
-                    {items.map((item: RecipeData) => (
+                    {recipes.map((recipe: RecipeData) => (
                         <Link to={{
                             pathname: "/recipe",
-                            search: `?id=${item.id}`
+                            search: `?id=${recipe.id}`
                         }} className="unhighlighted">
-                            <RecipeCard name={item.name} type={item.type} key={item.id}/>
+                            <RecipeCard name={recipe.name} type={recipe.type} key={recipe.id}/>
                         </Link>
                     ))}
                 </div>
