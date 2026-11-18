@@ -16,9 +16,16 @@ interface Recipe {
     ingredients: Ingredient[]
 }
 
+interface Relation {
+    id: number
+    name: string
+    type: string
+}
+
 const RecipeView = () => {
     const [isLoaded, setIsLoaded] = useState<boolean>(false)
     const [recipe, setRecipe] = useState<Recipe | any>();
+    const [related, setRelated] = useState<Relation[]>([]);
     const [error, setError] = useState<string>()
 
     const urlParams = new URLSearchParams(window.location.search)
@@ -39,6 +46,18 @@ const RecipeView = () => {
             })
             .catch((error) => {
                 setError(error.message)
+            })
+        fetch(`http://localhost:8000/recipe/related?id=${recipeId}`)
+            .then((res) => {
+                if (res.ok) {
+                    return res.json()
+                } else {
+                    throw new Error(`${res.status}`)
+                }
+            })
+            .then((json: Relation[]) => {
+                setRelated(json)
+                setIsLoaded(true)
             })
     }, [])
 
@@ -63,8 +82,8 @@ const RecipeView = () => {
         return (
             <>
                 <h1>{recipe.name}</h1>
-                <div className="container">
-                    <div className="instructions">
+                <div className="grid">
+                    <div className="instructions ">
                         <h2>Steps</h2>
                         <p>{recipe.steps}</p>
                     </div>
@@ -74,6 +93,17 @@ const RecipeView = () => {
                             return <p key={ingredient.name} className='ingredient'>
                                 {ingredient.quantity} {ingredient.quantity > 1 ? ingredient.unit + "s" : ingredient.unit} {ingredient.name}
                             </p>
+                        })}
+                    </div>
+                    <div className="related">
+                        <h3>More Recipes</h3>
+                        {related.map((relation: Relation) => {
+                            return (
+                            <>
+                                <p>{relation.name}</p>
+                                <p>{relation.type}</p>
+                            </>
+                            )
                         })}
                     </div>
                 </div>

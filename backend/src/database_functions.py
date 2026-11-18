@@ -66,7 +66,16 @@ def get_recipes_by_name(connection, name):
     pass
 
 def get_related_recipes(connection, recipe_id):
-    pass
+    query = ("SELECT main.recipe_id, main.recipe_name, side.recipe_id, "
+                "side.recipe_name, side.recipe_type FROM recipe AS main "
+                "JOIN goes_with AS g ON main.recipe_id = g.dish_1_id "
+                "JOIN recipe AS side ON side.recipe_id = g.dish_2_id "
+                "WHERE main.recipe_id = %s;")
+    cursor = connection.cursor()
+    cursor.execute(query, (recipe_id,))
+    ret = cursor.fetchall()
+    cursor.close()
+    return ret
 
 def make_meal(connection, meal_name, main_dish_id, side_dish_id=None, dessert_id=None):
     pass

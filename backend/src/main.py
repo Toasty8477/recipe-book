@@ -7,11 +7,12 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from mysql.connector import Error as MySQLError
 
-from database_functions import connect_to_db, add_ingredient, get_all_recipes, get_recipe_by_id
+from database_functions import connect_to_db, add_ingredient, get_all_recipes, get_recipe_by_id, get_related_recipes
 
 from pydantic_defs import IngredientModel
 from ingredient import Ingredient
 from recipe import Recipe
+from relation import Relation
 
 app = FastAPI()
 
@@ -62,7 +63,7 @@ def get_all_recipes_route():
     return {"recipes": response}
 
 @app.get("/recipe")
-def get_recipe_by_id_route(id: int = 0):
+async def get_recipe_by_id_route(id: int = 0):
     global db_connection
 
     if id <= 0:
@@ -91,6 +92,27 @@ def get_recipe_by_id_route(id: int = 0):
             "steps": recipe[3],
             "ingredients": ingredients
         }
+
+@app.get("/recipe/related")
+async def get_related_recipes_route(id: int = 0):
+    global db_connection
+
+    if id <= 0:
+            raise HTTPException(status_code=400, detail="id parameter less than 1 or not specified")
+
+    try:
+        relations = get_related_recipes(db_connection, id)
+        related = []
+
+        for relation in relations:
+            related.append(Relation(relation[2], relation[3], relation[4]))
+
+    except MySQLError as e:
+            # If an error occurs return code 500
+            raise HTTPException(status_code=500, detail=f"A database error occurred") 
+
+    return related
+    
     
 @app.on_event("startup")
 def startup_event():
