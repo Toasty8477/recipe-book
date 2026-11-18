@@ -9,7 +9,8 @@ from mysql.connector import Error as MySQLError
 
 from database_functions import connect_to_db, add_ingredient, get_all_recipes, get_recipe_by_id
 
-from request_class_defs import Ingredient
+from pydantic_defs import IngredientModel
+from ingredient import Ingredient
 from recipe import Recipe
 
 app = FastAPI()
@@ -34,7 +35,7 @@ async def root():
     return {"message": "Your API connection is working"}
 
 @app.post("/add_ingredient")
-def add_ingredient_route(ingredient: Ingredient):
+def add_ingredient_route(ingredient: IngredientModel):
     global db_connection
     try:
         add_ingredient(db_connection, ingredient.name, ingredient.type)
@@ -45,7 +46,7 @@ def add_ingredient_route(ingredient: Ingredient):
 @app.get("/recipes")
 def get_all_recipes_route():
     global db_connection
-    response = [];
+    response = []
 
     try:
         # Read all recipes from the database
@@ -68,12 +69,16 @@ def get_recipe_by_id_route(id: int = 0):
         raise HTTPException(status_code=400, detail="id parameter less than 1 or not specified")
 
     try:
-        recipe = get_recipe_by_id(db_connection, id)
+        recipe_all = get_recipe_by_id(db_connection, id)
 
-        if not len(recipe) == 1:
+        if not len(recipe_all) > 1:
             raise HTTPException(status_code=404, detail="Recipe could not be found")
 
-        recipe = recipe[0]
+        recipe = recipe_all[0]
+        ingredients = []
+
+        for recipe_row in recipe_all:
+            ingredients.append(Ingredient(recipe_row[6], recipe_row[7], recipe_row[4], recipe_row[5]))
 
     except MySQLError as e:
         # If an error occurs return code 500
@@ -83,7 +88,8 @@ def get_recipe_by_id_route(id: int = 0):
             "id": id,
             "name": recipe[1],
             "type": recipe[2],
-            "steps": recipe[3]
+            "steps": recipe[3],
+            "ingredients": ingredients
         }
     
 @app.on_event("startup")

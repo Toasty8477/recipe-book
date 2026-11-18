@@ -51,7 +51,11 @@ def get_all_recipes(connection):
     return ret
 
 def get_recipe_by_id(connection, recipe_id):
-    query = "SELECT * FROM recipe WHERE recipe_id = %s"
+    query = ("SELECT r.recipe_id, r.recipe_name, r.recipe_type, r.instructions, u.quantity, u.unit, "
+                "i.ingredient_name, i.ingredient_type FROM recipe AS r "
+                "LEFT JOIN used_in AS u ON r.recipe_id = u.recipe_id "
+                "JOIN ingredient AS i ON u.ingredient_name = i.ingredient_name "
+                "WHERE r.recipe_id = %s;")
     cursor = connection.cursor()
     cursor.execute(query, (recipe_id,))
     ret = cursor.fetchall()
