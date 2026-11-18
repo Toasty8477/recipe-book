@@ -1,0 +1,10 @@
+.container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+}
+.ingredient {
+    margin-bottom: 0.25fr
+}
+.instructions {
+    white-space: pre-wrap;
+}
