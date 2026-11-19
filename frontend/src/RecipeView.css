@@ -15,7 +15,7 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/. */
     height: fit-content;
 }
 .ingredient {
-    margin-bottom: 0.25rem
+    margin-bottom: 0.25rem;
 }
 .instructions {
     white-space: pre-wrap;

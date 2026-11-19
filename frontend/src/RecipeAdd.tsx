@@ -7,7 +7,7 @@ const RecipeAdd = () => {
         <>
             <h1>Add Recipe</h1>
         </>
-    )
-}
+    );
+};
 
-export default RecipeAdd
+export default RecipeAdd;

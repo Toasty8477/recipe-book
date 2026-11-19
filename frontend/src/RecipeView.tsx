@@ -2,86 +2,85 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import { useState, useEffect } from 'react'
-import './RecipeView.css'
+import { useState, useEffect } from "react";
+import "./RecipeView.css";
 
 interface Ingredient {
-    name: string
-    type: string
-    quantity: number
-    unit: string
+    name: string;
+    type: string;
+    quantity: number;
+    unit: string;
 }
 
 interface Recipe {
-    id: number
-    name: string
-    type: string
-    steps: string
-    ingredients: Ingredient[]
+    id: number;
+    name: string;
+    type: string;
+    steps: string;
+    ingredients: Ingredient[];
 }
 
 interface Relation {
-    id: number
-    name: string
-    type: string
+    id: number;
+    name: string;
+    type: string;
 }
 
 const RecipeView = () => {
-    const [isLoaded, setIsLoaded] = useState<boolean>(false)
+    const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [recipe, setRecipe] = useState<Recipe | any>();
     const [related, setRelated] = useState<Relation[]>([]);
-    const [error, setError] = useState<string>()
+    const [error, setError] = useState<string>();
 
-    const urlParams = new URLSearchParams(window.location.search)
-    const recipeId = urlParams.get("id")
+    const urlParams = new URLSearchParams(window.location.search);
+    const recipeId = urlParams.get("id");
 
     useEffect(() => {
         fetch(`http://localhost:8000/recipe?id=${recipeId}`)
             .then((res) => {
                 if (res.ok) {
-                    return res.json()
+                    return res.json();
                 } else {
-                    throw new Error(`${res.status}`)
+                    throw new Error(`${res.status}`);
                 }
             })
             .then((json: Recipe) => {
-                setRecipe(json)
-                setIsLoaded(true)
+                setRecipe(json);
+                setIsLoaded(true);
             })
             .catch((error) => {
-                setError(error.message)
-            })
+                setError(error.message);
+            });
         fetch(`http://localhost:8000/recipe/related?id=${recipeId}`)
             .then((res) => {
                 if (res.ok) {
-                    return res.json()
+                    return res.json();
                 } else {
-                    throw new Error(`${res.status}`)
+                    throw new Error(`${res.status}`);
                 }
             })
             .then((json: Relation[]) => {
-                setRelated(json)
-                setIsLoaded(true)
-            })
-    }, [])
-
+                setRelated(json);
+                setIsLoaded(true);
+            });
+    }, []);
 
     if (error) {
-        const errorStatus = error.substring(0, 2)
-        const errorCat = `https://http.cat/${errorStatus}`
+        const errorStatus = error.substring(0, 2);
+        const errorCat = `https://http.cat/${errorStatus}`;
         return (
             <>
                 <h1>Error Loading Recipes</h1>
                 <p>{error}</p>
-                <img src={errorCat} className="errorImage"/>
+                <img src={errorCat} className="errorImage" />
             </>
-        )
+        );
     } else if (!isLoaded) {
         return (
             <>
                 <h1>Loading Recipe</h1>
             </>
-        )
+        );
     } else {
         return (
             <>
@@ -94,26 +93,32 @@ const RecipeView = () => {
                     <div className="ingredients">
                         <h2>Ingredients</h2>
                         {recipe.ingredients.map((ingredient: Ingredient) => {
-                            return <p key={ingredient.name} className='ingredient'>
-                                {ingredient.quantity} {ingredient.quantity > 1 ? ingredient.unit + "s" : ingredient.unit} {ingredient.name}
-                            </p>
+                            return (
+                                <p key={ingredient.name} className="ingredient">
+                                    {ingredient.quantity}{" "}
+                                    {ingredient.quantity > 1
+                                        ? ingredient.unit + "s"
+                                        : ingredient.unit}{" "}
+                                    {ingredient.name}
+                                </p>
+                            );
                         })}
                     </div>
                     <div className="related">
                         <h3>More Recipes</h3>
                         {related.map((relation: Relation) => {
                             return (
-                            <>
-                                <p>{relation.name}</p>
-                                <p>{relation.type}</p>
-                            </>
-                            )
+                                <>
+                                    <p>{relation.name}</p>
+                                    <p>{relation.type}</p>
+                                </>
+                            );
                         })}
                     </div>
                 </div>
             </>
-        )
+        );
     }
-}
+};
 
-export default RecipeView
+export default RecipeView;

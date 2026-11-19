@@ -5,7 +5,7 @@ file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 .mainGrid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    padding: 1rem
+    padding: 1rem;
 }
 
 .addButton {
