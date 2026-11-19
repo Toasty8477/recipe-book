@@ -1,0 +1,11 @@
+# Ignore Artifacts and configs
+dist
+node_modules
+
+# Ignore Python Files
+**/*.py
+
+# Ignore Readmes
+**/README.md
+**/Readme.md
+**/readme.md
