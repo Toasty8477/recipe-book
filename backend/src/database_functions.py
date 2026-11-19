@@ -4,6 +4,7 @@
 
 import mysql.connector
 import os
+from pydantic_defs import IngredientModel
 
 def connect_to_db(connection=None):
 
@@ -17,18 +18,29 @@ def connect_to_db(connection=None):
     return connection
 
 def add_ingredient(connection, ingredient_name, ingredient_type):
-    query = "INSERT INTO ingredients (name, type) VALUES (%s, %s)"
+    search = "SELECT ingredient_name FROM ingredient WHERE ingredient_name = %s;"
+    query = "INSERT INTO ingredient (ingredient_name, ingredient_type) VALUES (%s, %s);"
     cursor = connection.cursor()
+    ingredient = None
 
     try:
-        cursor.execute(query, (ingredient_name, ingredient_type))
-        connection.commit()
+        cursor.execute(search, (ingredient_name,))
+        ingredient = cursor.fetchall()
+        # If ingredient does not exist yet create it
+        if len(ingredient) == 0:
+            cursor.execute(query, (ingredient_name, ingredient_type))
+            connection.commit()
+            cursor.execute(search, (ingredient_name,))
+            ingredient = cursor.fetchall()
+
     except mysql.connector.Error as e:
         print(f"Error adding ingredient: {e}")
         connection.rollback()
         raise
     finally:
         cursor.close()
+
+    return ingredient
 
 
 def get_ingredient(connection, ingredient_name):
@@ -39,8 +51,30 @@ def get_ingredient(connection, ingredient_name):
         return None
     return cursor.fetchone()
 
-def add_recipe(connection, recipe_name, recipe_type, ingredients, instructions):
-    pass
+def add_recipe(connection, recipe_name, recipe_type, instructions, ingredients: list[IngredientModel]):
+    add_recipe_query = "INSERT INTO recipe (recipe_name, recipe_type, instructions) VALUES (%s, %s, %s)"
+    get_id_query = "SELECT recipe_id FROM recipe WHERE recipe_name = %s"
+    link_ingredient_query = "INSERT INTO used_in VALUES (%s, %s, %s, %s)"
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(add_recipe_query, (recipe_name, recipe_type, instructions))
+        cursor.execute(get_id_query, (recipe_name,))
+        recipe_id = cursor.fetchall()[0][0]
+        
+        for ingredient in ingredients:
+            cursor.execute(link_ingredient_query, (recipe_id, ingredient.name, ingredient.quantity, ingredient.unit))
+
+        connection.commit()
+
+    except mysql.connector.Error as e:
+        connection.rollback()
+
+    finally:
+        cursor.close()
+
+    return recipe_id
+    
 
 def get_all_recipes(connection):
     query = "SELECT recipe_id, recipe_name, recipe_type FROM recipe"
@@ -63,7 +97,12 @@ def get_recipe_by_id(connection, recipe_id):
     return ret
 
 def get_recipes_by_name(connection, name):
-    pass
+    query = "SELECT recipe_id, recipe_name, recipe_type FROM recipe WHERE recipe_name = %s"
+    cursor = connection.cursor()
+    cursor.execute(query, (name,))
+    ret = cursor.fetchall()
+    cursor.close()
+    return ret
 
 def get_related_recipes(connection, recipe_id):
     query = ("SELECT main.recipe_id, main.recipe_name, side.recipe_id, "

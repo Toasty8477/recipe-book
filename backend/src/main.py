@@ -3,13 +3,13 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import sys
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from mysql.connector import Error as MySQLError
 
-from database_functions import connect_to_db, add_ingredient, get_all_recipes, get_recipe_by_id, get_related_recipes
+from database_functions import connect_to_db, add_ingredient, get_all_recipes, get_recipe_by_id, get_related_recipes, add_recipe, get_recipes_by_name
 
-from pydantic_defs import IngredientModel
+from pydantic_defs import IngredientModel, RecipeModel
 from ingredient import Ingredient
 from recipe import Recipe
 from relation import Relation
@@ -34,15 +34,6 @@ db_connection = None
 @app.get("/")
 async def root():
     return {"message": "Your API connection is working"}
-
-@app.post("/add_ingredient")
-def add_ingredient_route(ingredient: IngredientModel):
-    global db_connection
-    try:
-        add_ingredient(db_connection, ingredient.name, ingredient.type)
-    except MySQLError as e:
-        return {"error": f"Error adding ingredient: {e}"}
-    return {"message": f"Ingredient '{ingredient.name}' added successfully."}
 
 @app.get("/recipes")
 def get_all_recipes_route():
@@ -112,6 +103,55 @@ async def get_related_recipes_route(id: int = 0):
             raise HTTPException(status_code=500, detail=f"A database error occurred") 
 
     return related
+
+
+@app.post("/add_ingredient")
+def add_ingredient_route(ingredient: IngredientModel):
+    global db_connection
+    try:
+        add_ingredient(db_connection, ingredient.name, ingredient.type)
+    except MySQLError as e:
+        return {"error": f"Error adding ingredient: {e}"}
+    return {"message": f"Ingredient '{ingredient.name}' added successfully."}
+
+@app.post("/recipe", status_code=201)
+def add_recipe_route(recipe: RecipeModel, response: Response):
+    global db_connection
+
+    try:
+        existing_recipes = get_recipes_by_name(db_connection, recipe.name)
+        if not len(existing_recipes) == 0:
+            response.status_code = 200
+            return {
+                "message": "Recipe with the same name already exists"
+            }
+
+    except MySQLError as e:
+        raise HTTPException(status_code=500, detail="A database error occurred")
+
+    # Add ingredients if they don't already exist
+    try:
+        for ingredient in recipe.ingredients:
+            add_ingredient(db_connection, ingredient.name, ingredient.type)
+
+    except MySQLError as e:
+        raise HTTPException(status_code=500, detail="A database error occurred while adding ingredients")
+
+    try:
+        recipe_id = add_recipe(db_connection, recipe.name, recipe.type, recipe.steps, recipe.ingredients)
+
+    except MySQLError as e:
+        raise HTTPException(status_code=500, detail="A database error occurred while adding recipe")
+
+    return {
+        "message": "Recipe added successfully",
+        "recipe": {
+            "id": recipe_id,
+            "name": recipe.name,
+            "steps": recipe.steps,
+            "ingredients": recipe.ingredients
+        }
+    }
     
     
 @app.on_event("startup")
