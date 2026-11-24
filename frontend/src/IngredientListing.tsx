@@ -1,10 +1,9 @@
-import { useState } from 'react'
+import { useState } from "react";
 import "./IngredientListing.css";
 
 const IngredientListing = ({ id }: { id: number }) => {
-    // TODO: Add state for name, amount, and unit
-    const [name, setName] = useState<string>("")
-    const [amount, setAmount] = useState<number>(0)
+    const [name, setName] = useState<string>("");
+    const [amount, setAmount] = useState<number>(0);
     const [unit, setUnit] = useState<string>("");
 
     return (
@@ -12,17 +11,28 @@ const IngredientListing = ({ id }: { id: number }) => {
             <div className="ingredientListing">
                 <div className="ingredientField">
                     <label>Ingredient</label>
-                    <input type="text" name={"ingredient" + id + "Name"} value={name} onChange={e => setName(e.target.value)} />
+                    <input
+                        type="text"
+                        name={"ingredient" + id + "Name"}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
                 </div>
                 <div className="ingredientField">
                     <label>Amount</label>
                     <input
                         type="number"
-                        name={"ingredient" + id + "Quantity"} value={amount} onChange={e => setAmount(parseFloat(e.target.value))} />
+                        name={"ingredient" + id + "Quantity"}
+                        value={amount}
+                        onChange={(e) => setAmount(parseFloat(e.target.value))}
+                    />
                 </div>
                 <div className="ingredientField">
                     <label>Unit</label>
-                    <select name={"ingredient" + id + "Unit"} value={unit} onChange={e => setUnit(e.target.value)}>
+                    <select
+                        name={"ingredient" + id + "Unit"}
+                        value={unit}
+                        onChange={(e) => setUnit(e.target.value)}>
                         <optgroup label="Imperial">
                             <option value="Teaspoon">Teaspoon</option>
                             <option value="Tablespoon">Tablespoon</option>
