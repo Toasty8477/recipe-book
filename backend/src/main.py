@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from mysql.connector import Error as MySQLError
 
-from database_functions import connect_to_db, add_ingredient, get_all_recipes, get_recipe_by_id, get_related_recipes, add_recipe, get_recipes_by_name
+from database_functions import connect_to_db, add_ingredient, get_all_recipes, get_recipe_by_id, get_related_recipes, add_recipe, get_recipes_by_name, remove_recipe
 
 from pydantic_defs import IngredientModel, RecipeModel
 from ingredient import Ingredient
@@ -58,7 +58,7 @@ async def get_recipe_by_id_route(id: int = 0):
     global db_connection
 
     if id <= 0:
-        raise HTTPException(status_code=400, detail="id parameter less than 1 or not specified")
+        raise HTTPException(status_code=400, detail="Id parameter cannot be less than 1")
 
     try:
         recipe_all = get_recipe_by_id(db_connection, id)
@@ -89,7 +89,7 @@ async def get_related_recipes_route(id: int = 0):
     global db_connection
 
     if id <= 0:
-            raise HTTPException(status_code=400, detail="id parameter less than 1 or not specified")
+        raise HTTPException(status_code=400, detail="id parameter less than 1 or not specified")
 
     try:
         relations = get_related_recipes(db_connection, id)
@@ -153,6 +153,19 @@ def add_recipe_route(recipe: RecipeModel, response: Response):
             "ingredients": recipe.ingredients
         }
     }
+
+@app.delete("/recipe", status_code=204)
+def delete_recipe_route(id: int = 0):
+    global db_connection
+
+    if id <= 0:
+        raise HTTPException(status_code=400, detail="id parameter less than 1 or not specified")
+
+    try:
+        remove_recipe(db_connection, id)
+    except MySQLError:
+        raise HTTPException(status_code=500, detail="A database error occurred")
+    
     
     
 @app.on_event("startup")

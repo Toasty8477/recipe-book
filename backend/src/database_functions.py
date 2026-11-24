@@ -49,7 +49,9 @@ def get_ingredient(connection, ingredient_name):
     cursor.execute(query, (ingredient_name,))
     if cursor.rowcount == 0:
         return None
-    return cursor.fetchone()
+    ret = cursor.fetchone()
+    connection.commit()
+    return ret
 
 def add_recipe(connection, recipe_name, recipe_type, instructions, ingredients: list[IngredientModel]):
     add_recipe_query = "INSERT INTO recipe (recipe_name, recipe_type, instructions) VALUES (%s, %s, %s)"
@@ -82,6 +84,7 @@ def get_all_recipes(connection):
     cursor.execute(query)
     ret = cursor.fetchall()
     cursor.close()
+    connection.commit()
     return ret
 
 def get_recipe_by_id(connection, recipe_id):
@@ -94,6 +97,7 @@ def get_recipe_by_id(connection, recipe_id):
     cursor.execute(query, (recipe_id,))
     ret = cursor.fetchall()
     cursor.close()
+    connection.commit()
     return ret
 
 def get_recipes_by_name(connection, name):
@@ -102,6 +106,7 @@ def get_recipes_by_name(connection, name):
     cursor.execute(query, (name,))
     ret = cursor.fetchall()
     cursor.close()
+    connection.commit()
     return ret
 
 def get_related_recipes(connection, recipe_id):
@@ -114,7 +119,23 @@ def get_related_recipes(connection, recipe_id):
     cursor.execute(query, (recipe_id,))
     ret = cursor.fetchall()
     cursor.close()
+    connection.commit()
     return ret
 
-def make_meal(connection, meal_name, main_dish_id, side_dish_id=None, dessert_id=None):
-    pass
+def remove_recipe(connection, recipe_id: int):
+    query1 = "DELETE FROM recipe WHERE recipe_id = %s"
+    query2 = "DELETE FROM used_in WHERE recipe_id = %s"
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(query2, (recipe_id,))
+        cursor.execute(query1, (recipe_id,))
+        connection.commit()
+
+    except mysql.connector.Error:
+        connection.rollback()
+        raise
+    finally:
+        cursor.close()
+
+    return True
