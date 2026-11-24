@@ -1,0 +1,90 @@
+.recipeAddGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 3fr 1fr;
+    column-gap: 1rem;
+    row-gap: 1rem;
+    margin: 1rem;
+}
+
+.formField {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.5rem;
+}
+
+.formField select {
+    box-sizing: border-box;
+    width: fit-content;
+}
+
+.formField input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+.details {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 1rem;
+}
+
+.details > .formField:first-child {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.details > .formField:last-child {
+    flex: 0 0 auto;
+}
+
+.recipeFields {
+    grid-column: 1 / span 2;
+}
+
+.formButtons {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    column-gap: 1rem;
+    grid-column: 1 / span 3;
+}
+
+.submitButton {
+    background-color: green;
+    width: 100%;
+    height: fit-content;
+    padding: 2rem;
+    border: 0px;
+    border-radius: 1.5rem;
+}
+
+.cancelButton {
+    background-color: red;
+    width: 100%;
+    height: fit-content;
+    padding: 2rem;
+    border: 0px;
+    border-radius: 1.5rem;
+}
+
+textarea {
+    resize: none
+}
+
+.ingredientButton {
+    margin: 1rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 0px;
+}
+
+.no {
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+    width: 100%;
+}

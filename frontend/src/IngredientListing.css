@@ -1,0 +1,23 @@
+.ingredientField {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.5rem;
+}
+
+.ingredientListing {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 0.5rem;
+}
+
+.ingredientField input {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.ingredientField select {
+    box-sizing: border-box;
+    width: fit-content;
+}
