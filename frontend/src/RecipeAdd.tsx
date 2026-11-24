@@ -45,7 +45,8 @@ const RecipeAdd = () => {
     const addIngredientListing = () => {
         setIngredientCount((current) => current + 1);
         setIngredients(
-            ingredients.concat([<IngredientListing id={ingredientCount} />]),
+            // ingredientCount+1 is a workaround for state shenanigans
+            ingredients.concat([<IngredientListing id={ingredientCount+1} />]),
         );
     };
 
