@@ -63,7 +63,7 @@ async def get_recipe_by_id_route(id: int = 0):
     try:
         recipe_all = get_recipe_by_id(db_connection, id)
 
-        if not len(recipe_all) > 1:
+        if not len(recipe_all) >= 1:
             raise HTTPException(status_code=404, detail="Recipe could not be found")
 
         recipe = recipe_all[0]
@@ -123,7 +123,8 @@ def add_recipe_route(recipe: RecipeModel, response: Response):
         if not len(existing_recipes) == 0:
             response.status_code = 200
             return {
-                "message": "Recipe with the same name already exists"
+                "message": "Recipe with the same name already exists",
+                "id": existing_recipes[0][0]
             }
 
     except MySQLError as e:
