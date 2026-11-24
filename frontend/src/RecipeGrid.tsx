@@ -22,6 +22,7 @@ const RecipeGrid = () => {
     const [recipes, setRecipes] = useState<any[]>([]);
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [error, setError] = useState<string>();
+    const [updateListing, setUpdateListing] = useState<boolean>(false);
 
     useEffect(() => {
         fetch("http://localhost:8000/recipes")
@@ -39,7 +40,11 @@ const RecipeGrid = () => {
             .catch((error) => {
                 setError(error.message);
             });
-    }, []);
+    }, [updateListing]);
+
+    const update = () => {
+        setUpdateListing(e => {return !e})
+    }
 
     if (error) {
         const errorStatus = error.substring(0, 2);
@@ -63,18 +68,13 @@ const RecipeGrid = () => {
                 <h1>Recipes</h1>
                 <div className="mainGrid">
                     {recipes.map((recipe: RecipeData) => (
-                        <Link
-                            to={{
-                                pathname: "/recipe",
-                                search: `?id=${recipe.id}`,
-                            }}
-                            className="unhighlighted">
                             <RecipeCard
                                 name={recipe.name}
                                 type={recipe.type}
+                                id={recipe.id}
+                                updateHook={update}
                                 key={recipe.id}
                             />
-                        </Link>
                     ))}
                 </div>
                 <Link to="/add" className="addButton">
